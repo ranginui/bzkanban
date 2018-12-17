@@ -386,7 +386,7 @@ function loadBoard(callbackLoadBoard) {
 function loadBugs(callback) {
     bzBoardLoadTime = new Date().toISOString();
 
-    bzRestGetBugsUrl = "/rest.cgi/bug?product=" + bzProduct;
+    bzRestGetBugsUrl = "/rest/bug?product=" + bzProduct;
     bzRestGetBugsUrl += "&include_fields=summary,status,resolution,id,severity,priority,assigned_to,last_updated,deadline";
     bzRestGetBugsUrl += "&order=" + bzOptions.order;
     bzRestGetBugsUrl += "&target_milestone=" + bzProductMilestone;
@@ -421,7 +421,7 @@ function loadBugs(callback) {
 }
 
 function loadProductsList(callback) {
-    httpGet("/rest.cgi/product?type=enterable&include_fields=name", function(response) {
+    httpGet("/rest/product?type=enterable&include_fields=name", function(response) {
         document.getElementById("textProduct").disabled = false;
         var products = response.products;
         products.sort(function(a, b) {
@@ -446,7 +446,7 @@ function loadMilestonesList(callback) {
     }
 
     clearMilestonesList();
-    httpGet("/rest.cgi/product?names=" + bzProduct + "&include_fields=milestones", function(response) {
+    httpGet("/rest/product?names=" + bzProduct + "&include_fields=milestones", function(response) {
         document.getElementById("textMilestone").disabled = false;
         var milestones = response.products[0].milestones;
         milestones.forEach(function(milestone) {
@@ -511,7 +511,7 @@ function loadColumnsAndCards(callback) {
 }
 
 function loadColumns(callback) {
-    httpGet("/rest.cgi/field/bug/status/values", function(response) {
+    httpGet("/rest/field/bug/status/values", function(response) {
         // Always add a backlog as first column
         var backlog = addBoardColumn("BACKLOG");
         hideBacklog();
@@ -526,7 +526,7 @@ function loadColumns(callback) {
 }
 
 function loadComments(bug) {
-    httpGet("/rest.cgi/bug/" + bug.id + "/comment?include_fields=id", function(response) {
+    httpGet("/rest/bug/" + bug.id + "/comment?include_fields=id", function(response) {
         var card = getCardElement(bug.id);
         var commentCount = response.bugs[bug.id].comments.length - 1;
         if (commentCount > 1) {
@@ -546,7 +546,7 @@ function loadName(callback) {
     if (!isLoggedIn()) {
         return callback();
     }
-    httpGet("/rest.cgi/user/" + bzAuthObject.userID, function(response) {
+    httpGet("/rest/user/" + bzAuthObject.userID, function(response) {
         bzUserFullName = response.users[0].real_name;
         if (bzUserFullName !== null) {
             var el = document.getElementById("whoami");
@@ -560,7 +560,7 @@ function loadName(callback) {
 
 function loadResolutions(callback) {
     bzProductResolutions = new Set();
-    httpGet("/rest.cgi/field/bug/resolution", function(response) {
+    httpGet("/rest/field/bug/resolution", function(response) {
         var arrayResolutions = response.fields;
         arrayResolutions[0].values.forEach(function(resolution) {
             var resolutionName = resolution.name;
@@ -575,7 +575,7 @@ function loadResolutions(callback) {
 
 function loadPriorities(callback) {
     bzProductPriorities = new Set();
-    httpGet("/rest.cgi/field/bug/priority", function(response) {
+    httpGet("/rest/field/bug/priority", function(response) {
         var arrayPriorities = response.fields;
         arrayPriorities[0].values.forEach(function(priority) {
             var priorityName = priority.name;
@@ -590,7 +590,7 @@ function loadPriorities(callback) {
 
 function loadSeverities(callback) {
     bzProductSeverities = new Set();
-    httpGet("/rest.cgi/field/bug/bug_severity", function(response) {
+    httpGet("/rest/field/bug/bug_severity", function(response) {
         var arraySeverities = response.fields;
         arraySeverities[0].values.forEach(function(severity) {
             var severityName = severity.name;
@@ -605,7 +605,7 @@ function loadSeverities(callback) {
 
 function loadComponentsList(callback) {
     bzProductComponents = new Set();
-    httpGet("/rest.cgi/product/" + bzProduct + "?type=enterable&include_fields=components", function(response) {
+    httpGet("/rest/product/" + bzProduct + "?type=enterable&include_fields=components", function(response) {
         var components = response.products[0].components;
         components.sort(function(a, b) {
             return a.name.localeCompare(b.name);
@@ -622,7 +622,7 @@ function loadComponentsList(callback) {
 
 function loadVersionsList(callback) {
     bzProductVersions = new Set();
-    httpGet("/rest.cgi/product/" + bzProduct + "?type=enterable&include_fields=versions", function(response) {
+    httpGet("/rest/product/" + bzProduct + "?type=enterable&include_fields=versions", function(response) {
         var versions = response.products[0].versions;
         versions.sort(function(a, b) {
             return a.name.localeCompare(b.name);
@@ -659,7 +659,7 @@ function loadCheckForUpdates() {
 }
 
 function loadDefaultPrioritySeverityFields(callback) {
-    httpGet("/rest.cgi/parameters", function(response) {
+    httpGet("/rest/parameters", function(response) {
         // HACK: The BMO site returns "no such method" response for some reason.
         if (!response.error) {
             bzDefaultPriority = response.parameters.defaultpriority;
@@ -670,7 +670,7 @@ function loadDefaultPrioritySeverityFields(callback) {
 }
 
 function loadUnconfirmedVisibility(callback) {
-    httpGet("/rest.cgi/product/" + bzProduct + "?include_fields=has_unconfirmed", function(response) {
+    httpGet("/rest/product/" + bzProduct + "?include_fields=has_unconfirmed", function(response) {
         bzProductHasUnconfirmed = response.products[0].has_unconfirmed;
         updateUnconfirmedColumnVisibilty();
         callback();
@@ -678,7 +678,7 @@ function loadUnconfirmedVisibility(callback) {
 }
 
 function loadDefaultMilestone(callback) {
-    httpGet("/rest.cgi/product/" + bzProduct + "?type=enterable&include_fields=default_milestone", function(response) {
+    httpGet("/rest/product/" + bzProduct + "?type=enterable&include_fields=default_milestone", function(response) {
         bzDefaultMilestone = response.products[0].default_milestone;
         callback();
     });
@@ -1019,7 +1019,7 @@ function hideNotification() {
 
 function doAuth(user, password) {
     showSpinner();
-    httpGet("/rest.cgi/login?login=" + user + "&password=" + encodeURIComponent(password), function(response) {
+    httpGet("/rest/login?login=" + user + "&password=" + encodeURIComponent(password), function(response) {
         bzAuthObject = { 'userID': response.id, 'userToken': response.token };
         localStorage.setItem(bzOptions.siteUrl, JSON.stringify(bzAuthObject));
         // force page refresh to rebuild entire page state based on users privelges.
@@ -1075,7 +1075,7 @@ function showColumnCounts() {
 function writeBug(dataObj) {
     dataObj.token = bzAuthObject.userToken;
 
-    httpPut("/rest.cgi/bug/" + dataObj.id, dataObj, function() {
+    httpPut("/rest/bug/" + dataObj.id, dataObj, function() {
         loadBoard();
     });
 }
@@ -1202,7 +1202,7 @@ function isBacklogVisible() {
 function loadBacklogCards(callback) {
     showSpinner();
 
-    bzRestGetBacklogUrl = "/rest.cgi/bug?product=" + bzProduct;
+    bzRestGetBacklogUrl = "/rest/bug?product=" + bzProduct;
     bzRestGetBacklogUrl += "&include_fields=summary,status,id,severity,priority,assigned_to,last_updated,deadline";
     bzRestGetBacklogUrl += "&order=" + bzOptions.order;
     bzRestGetBacklogUrl += "&target_milestone=---";
@@ -1365,7 +1365,7 @@ function showNewBugModal() {
             target_milestone: bzProductMilestone
         };
 
-        httpRequest("POST", "/rest.cgi/bug", dataObj, function() {
+        httpRequest("POST", "/rest/bug", dataObj, function() {
             loadBoard();
         });
 
@@ -1465,7 +1465,7 @@ function showBugModal(bugCurrent, bugUpdate) {
         showSpinner();
 
         // Show comments and description
-        httpGet("/rest.cgi/bug/" + bugCurrent.id + "/comment?include_fields=text,time,creator", function(response) {
+        httpGet("/rest/bug/" + bugCurrent.id + "/comment?include_fields=text,time,creator", function(response) {
             hideSpinner();
             var commentsObj = response.bugs[bugCurrent.id].comments;
 
@@ -1651,7 +1651,7 @@ function loadEmailAddress(callback) {
         }
         idUrl += "ids=" + user.id + "&";
     });
-    httpGet("/rest.cgi/user?" + idUrl + "include_fields=email,name", function(response) {
+    httpGet("/rest/user?" + idUrl + "include_fields=email,name", function(response) {
         response.users.forEach(function(user) {
             var userDetail = bzAssignees.get(user.name);
             userDetail.email = user.email;
